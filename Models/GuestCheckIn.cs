@@ -1,0 +1,25 @@
+﻿using Staybnb.Enums;
+
+namespace Staybnb.Models;
+
+public class GuestCheckIn
+{
+    public int Id { get; set; }
+
+    public int BookingId { get; set; }
+    public Booking Booking { get; set; } = null!;
+
+    public int CheckInProcessId { get; set; }
+    public CheckInProcess CheckInProcess { get; set; } = null!;
+
+    public CheckInStatus Status { get; set; } = CheckInStatus.Pending;
+
+    /// <summary>Which step of the multi-step workflow the guest is on (1-based).</summary>
+    public int CurrentStep { get; set; } = 1;
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? CompletedAt { get; set; }
+
+    // One-to-Many: a check-in can require multiple documents
+    public ICollection<GuestDocument> Documents { get; set; } = new List<GuestDocument>();
+}
