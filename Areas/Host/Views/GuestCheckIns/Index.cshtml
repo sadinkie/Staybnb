@@ -1,0 +1,155 @@
+﻿@using Staybnb.Enums
+@using Staybnb.Models
+@model List<GuestCheckIn>
+
+@{
+    ViewData["Title"] = "Guest Check-ins";
+}
+
+<div class="panel p-4 mb-4">
+    <h2 class="h4 fw-bold text-danger">
+        Guest Check-in Verification
+    </h2>
+
+    <p class="text-muted mb-0">
+        Review identification documents submitted by Guests.
+    </p>
+</div>
+
+@if (TempData["Success"] is string success)
+{
+    <div class="alert alert-success">@success</div>
+}
+
+@if (TempData["Error"] is string error)
+{
+    <div class="alert alert-danger">@error</div>
+}
+
+@if (!Model.Any())
+{
+    <div class="panel p-4 text-center">
+        <p class="text-muted mb-0">
+            No Guest check-in submissions yet.
+        </p>
+    </div>
+}
+else
+{
+    @foreach (var checkIn in Model)
+    {
+        <div class="panel p-4 mb-4">
+
+            <div class="d-flex justify-content-between
+                align-items-start mb-3">
+
+                <div>
+                    <h5 class="fw-bold">
+                        @checkIn.Booking.Property.Title
+                    </h5>
+
+                    <p class="text-muted mb-1">
+                        Guest:
+                        @checkIn.Booking.Guest.UserName
+                    </p>
+
+                    <p class="text-muted mb-0">
+                        Booking #@checkIn.BookingId
+                    </p>
+                </div>
+
+                <span class="badge bg-secondary">
+                    @checkIn.Status
+                </span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Document Type</th>
+                            <th>Status</th>
+                            <th>Remarks</th>
+                            <th>File</th>
+                            <th>Review</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var document in checkIn.Documents)
+                        {
+                            <tr>
+                                <td>@document.DocumentType</td>
+
+                                <td>
+                                    @document.Status
+                                </td>
+
+                                <td>
+                                    @(document.HostRemarks ?? "-")
+                                </td>
+
+                                <td>
+                                    <a asp-area="Host"
+                                       asp-controller="GuestCheckIns"
+                                       asp-action="Document"
+                                       asp-route-id="@document.Id"
+                                       class="btn btn-outline-secondary btn-sm">
+                                        Open
+                                    </a>
+                                </td>
+
+                                <td>
+                                    @if (checkIn.Status ==
+                                         CheckInStatus.Submitted &&
+                                         document.Status ==
+                                         DocumentStatus.Pending)
+                                    {
+                                        <form asp-area="Host"
+                                              asp-controller="GuestCheckIns"
+                                              asp-action="ReviewDocument"
+                                              method="post">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="hidden"
+                                                   name="documentId"
+                                                   value="@document.Id" />
+
+                                            <textarea name="remarks"
+                                                      class="form-control form-control-sm mb-2"
+                                                      maxlength="500"
+                                                      placeholder="Remarks (required if rejecting)"></textarea>
+
+                                            <div class="d-flex gap-2">
+                                                <button type="submit"
+                                                        name="approve"
+                                                        value="true"
+                                                        class="btn btn-success btn-sm">
+                                                    Verify
+                                                </button>
+
+                                                <button type="submit"
+                                                        name="approve"
+                                                        value="false"
+                                                        class="btn btn-danger btn-sm">
+                                                    Reject
+                                                </button>
+                                            </div>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            Reviewed / Not ready
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}

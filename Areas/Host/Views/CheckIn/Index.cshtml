@@ -1,0 +1,91 @@
+﻿@using Staybnb.Models
+@model List<HostProperty>
+
+@{
+    ViewData["Title"] = "Check-in Requirements";
+}
+
+<div class="panel p-4 mb-4">
+    <h2 class="h4 text-danger fw-bold">
+        Check-in Requirements
+    </h2>
+
+    <p class="text-muted mb-0">
+        Configure check-in instructions and required
+        documents for your properties.
+    </p>
+</div>
+
+@if (TempData["Success"] is string success)
+{
+    <div class="alert alert-success">@success</div>
+}
+
+<div class="panel">
+    <div class="panel-head">
+        <span>My Properties</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Location</th>
+                    <th>Check-in Setup</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var property in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">
+                            @property.Title
+                        </td>
+
+                        <td>
+                            @property.City, @property.Country
+                        </td>
+
+                        <td>
+                            @if (property.CheckInProcess is not null)
+                            {
+                                <span class="badge bg-success">
+                                    Configured
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark">
+                                    Not Configured
+                                </span>
+                            }
+                        </td>
+
+                        <td>
+                            <a asp-area="Host"
+                               asp-controller="CheckIn"
+                               asp-action="Edit"
+                               asp-route-id="@property.Id"
+                               class="btn btn-outline-danger btn-sm">
+                                Configure
+                            </a>
+                        </td>
+                    </tr>
+                }
+
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="4"
+                            class="text-center text-muted py-4">
+                            No approved properties available.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

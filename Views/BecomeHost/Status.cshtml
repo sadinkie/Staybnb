@@ -1,0 +1,87 @@
+﻿@model HostApplicationStatusViewModel
+@{
+    ViewData["Title"] = "Host application status";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-9 col-xl-8">
+
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+            <div>
+                <h1 class="page-title h2 mb-1">Host application status</h1>
+                <p class="text-muted mb-0">Follow your applications from submission to decision.</p>
+            </div>
+
+            @if (Model.CanApply)
+            {
+                <a asp-action="Index" class="btn btn-danger">
+                    <i class="fa-solid fa-plus me-1"></i>@(Model.Applications.Any() ? "Apply again" : "Start an application")
+                </a>
+            }
+        </div>
+
+        @if (!Model.Applications.Any())
+        {
+            <div class="text-center py-5">
+                <div class="display-6 mb-2">🏠</div>
+                <h2 class="h5">You haven't applied yet</h2>
+                <p class="text-muted">List your first place and start earning as a Host.</p>
+            </div>
+        }
+
+        @foreach (var app in Model.Applications)
+        {
+            var badgeClass = app.Status switch
+            {
+                ApplicationStatus.Approved => "status-approved",
+                ApplicationStatus.Rejected => "status-rejected",
+                _ => "status-pending"
+            };
+            var badgeIcon = app.Status switch
+            {
+                ApplicationStatus.Approved => "fa-circle-check",
+                ApplicationStatus.Rejected => "fa-circle-xmark",
+                _ => "fa-hourglass-half"
+            };
+            var badgeText = app.Status == ApplicationStatus.Pending ? "Under review" : app.Status.ToString();
+
+            <article class="app-card">
+                <img class="app-thumb" src="@(app.ThumbnailUrl ?? PlaceholderImage.UrlFor(0))" alt="@app.PropertyTitle" />
+
+                <div class="app-body">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div>
+                            <h2 class="h5 mb-1">@app.PropertyTitle</h2>
+                            <div class="text-muted small">
+                                <i class="fa-solid fa-location-dot me-1"></i>@app.City
+                                &middot; @Money.Rand(app.PricePerNight) per night
+                            </div>
+                        </div>
+                        <span class="status-badge @badgeClass"><i class="fa-solid @badgeIcon me-1"></i>@badgeText</span>
+                    </div>
+
+                    <div class="text-muted small mt-2">
+                        Applied @app.AppliedAt.ToLocalTime().ToString("d MMM yyyy, HH:mm")
+                        @if (app.ReviewedAt.HasValue)
+                        {
+                            <span>&middot; Reviewed @app.ReviewedAt.Value.ToLocalTime().ToString("d MMM yyyy")</span>
+                        }
+                    </div>
+
+                    @if (app.Status == ApplicationStatus.Pending)
+                    {
+                        <p class="small mb-0 mt-2">An Admin is reviewing your application. We'll notify you as soon as there's a decision.</p>
+                    }
+                    else if (app.Status == ApplicationStatus.Approved)
+                    {
+                        <p class="small mb-0 mt-2 text-success">Congratulations! You are now a Host. Log out and back in if your menu has not updated.</p>
+                    }
+                    else if (!string.IsNullOrWhiteSpace(app.AdminNotes))
+                    {
+                        <div class="admin-note"><strong>Reviewer's note:</strong> @app.AdminNotes</div>
+                    }
+                </div>
+            </article>
+        }
+    </div>
+</div>

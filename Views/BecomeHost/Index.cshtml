@@ -1,0 +1,63 @@
+﻿@model BecomeHostViewModel
+@{
+    ViewData["Title"] = "Become a Host";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-9 col-xl-8">
+
+        <div class="mb-4">
+            <h1 class="page-title h2 mb-1">Become a Host</h1>
+            <p class="text-muted mb-0">
+                Tell us about your place. An Admin reviews every application before it goes live.
+                At least one photo is required.
+            </p>
+        </div>
+
+        <form asp-action="Index" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <partial name="_PropertyFormFields" model="Model" />
+
+            <!-- 5. Photos -->
+            <section class="form-section">
+                <h2 class="form-section-title"><span class="section-number">5</span> Add photos <span class="badge bg-danger ms-2">Required</span></h2>
+
+                <p class="text-muted small">
+                    Upload 1 to @Staybnb.Services.UploadRules.MaxImages photos (JPG, PNG or WEBP, up to 5 MB each).
+                    The first photo becomes your cover image.
+                </p>
+
+                <input type="file" id="imageInput" name="Images" class="form-control"
+                       accept=".jpg,.jpeg,.png,.webp" multiple required
+                       data-max="@Staybnb.Services.UploadRules.MaxImages" data-max-mb="5"
+                       data-preview="#previewGrid" data-message="#imageMessage" />
+
+                <div id="imageMessage" class="text-danger small mt-2"></div>
+
+                @if (ViewData.ModelState.TryGetValue("Images", out var imageState) && imageState.Errors.Count > 0)
+                {
+                    <ul class="text-danger small mt-2 mb-0">
+                        @foreach (var error in imageState.Errors)
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    </ul>
+                    <div class="text-muted small mt-1">Please select your photos again. Browsers clear file choices after an error.</div>
+                }
+
+                <div id="previewGrid" class="preview-grid"></div>
+            </section>
+
+            <div class="d-flex gap-2 justify-content-end mb-5">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                <button type="submit" class="btn btn-danger px-4">Submit application</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/image-picker.js" asp-append-version="true"></script>
+}

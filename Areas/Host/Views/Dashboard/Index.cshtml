@@ -1,6 +1,135 @@
-﻿@{
+﻿@model HostDashboardViewModel
+@{
     ViewData["Title"] = "Host Dashboard";
 }
 
-<h1 class="h3">Host Dashboard</h1>
-<p class="text-muted">Placeholder. You can only see this page if you are a Host.</p>
+<!-- Welcome -->
+<div class="panel p-4 mb-4">
+    <h2 class="h4 mb-1 text-danger fw-bold">Welcome back, @Model.FirstName!</h2>
+    <p class="text-muted">Here's what's happening with your properties today.</p>
+    <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-outline-danger btn-sm" asp-controller="Properties" asp-action="Create">
+            <i class="fa-solid fa-plus me-1"></i>Add New Property
+        </a>
+        <a class="btn btn-outline-danger btn-sm" href="/Host/Bookings">
+            <i class="fa-solid fa-calendar-check me-1"></i>View Booking Requests
+        </a>
+        <a class="btn btn-outline-danger btn-sm"
+           asp-area="Host"
+           asp-controller="GuestCheckIns"
+           asp-action="Index">
+            <i class="fa-solid fa-file-circle-check me-1"></i>
+            Review Guest Check-ins
+        </a>
+    </div>
+</div>
+
+@if (Model.PendingBookingRequests > 0)
+{
+    <div class="alert alert-warning">
+        <i class="fa-solid fa-bell me-2"></i>
+        You have <strong>@Model.PendingBookingRequests</strong> booking @(Model.PendingBookingRequests == 1 ? "request" : "requests") waiting for your decision.
+        <a href="/Host/Bookings" class="alert-link ms-1">Review now</a>
+    </div>
+}
+
+@if (Model.PendingProperties > 0)
+{
+    <div class="alert alert-info">
+        <i class="fa-solid fa-hourglass-half me-2"></i>
+        <strong>@Model.PendingProperties</strong> property @(Model.PendingProperties == 1 ? "application is" : "applications are") waiting for Admin approval.
+    </div>
+}
+
+<!-- Stat cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <span class="stat-icon icon-blue"><i class="fa-solid fa-house"></i></span>
+            <div class="stat-value">@Model.TotalProperties</div>
+            <div class="stat-label">Total Properties</div>
+            <div class="stat-sub text-success">@Model.ActiveProperties active</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <span class="stat-icon icon-purple"><i class="fa-solid fa-calendar-days"></i></span>
+            <div class="stat-value">@Model.TotalBookings</div>
+            <div class="stat-label">Total Bookings</div>
+            <div class="stat-sub text-danger">@Model.BookingsThisMonth this month</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <span class="stat-icon icon-green"><i class="fa-solid fa-money-bill-wave"></i></span>
+            <div class="stat-value">@Money.Rand(Model.TotalEarnings)</div>
+            <div class="stat-label">Total Earnings</div>
+            <div class="stat-sub text-danger">@Money.Rand(Model.EarningsThisMonth) this month</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <span class="stat-icon icon-orange"><i class="fa-solid fa-star"></i></span>
+            <div class="stat-value">@Model.AverageRating.ToString("0.0")</div>
+            <div class="stat-label">Average Rating</div>
+            <div class="stat-sub text-success">@Model.ReviewCount @(Model.ReviewCount == 1 ? "review" : "reviews")</div>
+        </div>
+    </div>
+</div>
+
+<!-- Performance metrics -->
+<div class="panel mb-4">
+    <div class="panel-head"><span>Performance Metrics</span></div>
+    <div class="row g-0 text-center metric-row">
+        <div class="col-6 col-md-3 metric">
+            <div class="metric-value">@Model.OccupancyRate.ToString("0.#")%</div>
+            <div class="metric-label">Occupancy (last 30 days)</div>
+        </div>
+        <div class="col-6 col-md-3 metric">
+            <div class="metric-value">@Model.AcceptanceRate.ToString("0.#")%</div>
+            <div class="metric-label">Booking acceptance rate</div>
+        </div>
+        <div class="col-6 col-md-3 metric">
+            <div class="metric-value">@Money.Rand(Model.AverageNightlyRate)</div>
+            <div class="metric-label">Average nightly rate</div>
+        </div>
+        <div class="col-6 col-md-3 metric">
+            <div class="metric-value">@Money.Rand(Model.AverageBookingValue)</div>
+            <div class="metric-label">Average booking value</div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent bookings -->
+<div class="panel">
+    <div class="panel-head">
+        <span>Recent Booking Requests</span>
+        <a class="small" href="/Host/Bookings">View all</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr><th>Guest</th><th>Property</th><th>Dates</th><th>Earnings</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var b in Model.RecentBookings)
+                {
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">@b.GuestName</div>
+                            <div class="text-muted small">@b.GuestEmail</div>
+                        </td>
+                        <td>@b.PropertyTitle</td>
+                        <td class="text-nowrap">@b.CheckIn.ToString("d MMM") to @b.CheckOut.ToString("d MMM yyyy")</td>
+                        <td>@Money.Rand(b.Earnings)</td>
+                        <td><span class="status-badge @BadgeStyle.For(b.Status)">@b.Status</span></td>
+                    </tr>
+                }
+                @if (!Model.RecentBookings.Any())
+                {
+                    <tr><td colspan="5" class="text-center text-muted py-4">No bookings yet. Requests from guests will appear here.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

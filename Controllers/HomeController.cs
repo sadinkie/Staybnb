@@ -67,7 +67,7 @@ public class HomeController : Controller
                 .ToList()
         };
 
-        return View(model);
+        return View("Index1", model);
     }
 
     public IActionResult Privacy() => View();

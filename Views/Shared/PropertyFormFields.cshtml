@@ -1,0 +1,108 @@
+﻿@model BecomeHostViewModel
+
+<!-- 1. About -->
+<section class="form-section">
+    <h2 class="form-section-title"><span class="section-number">1</span> About your place</h2>
+
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" placeholder="e.g. Cozy Forest Cabin" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="PropertyType" class="form-label"></label>
+        <select asp-for="PropertyType" asp-items="Html.GetEnumSelectList<PropertyType>()" class="form-select"></select>
+    </div>
+
+    <div class="mb-0">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control" rows="5"
+                  placeholder="What makes your place special? Describe the space, the surroundings and what guests can expect."></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+</section>
+
+<!-- 2. Location -->
+<section class="form-section">
+    <h2 class="form-section-title"><span class="section-number">2</span> Where is it?</h2>
+
+    <div class="mb-3">
+        <label asp-for="Address" class="form-label"></label>
+        <input asp-for="Address" class="form-control" />
+        <span asp-validation-for="Address" class="text-danger"></span>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3 mb-md-0">
+            <label asp-for="City" class="form-label"></label>
+            <input asp-for="City" class="form-control" />
+            <span asp-validation-for="City" class="text-danger"></span>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="Country" class="form-label"></label>
+            <input asp-for="Country" class="form-control" />
+            <span asp-validation-for="Country" class="text-danger"></span>
+        </div>
+    </div>
+</section>
+
+<!-- 3. Pricing and capacity -->
+<section class="form-section">
+    <h2 class="form-section-title"><span class="section-number">3</span> Pricing and capacity</h2>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label asp-for="PricePerNight" class="form-label"></label>
+            <input asp-for="PricePerNight" type="number" min="1" step="0.01" class="form-control" />
+            <span asp-validation-for="PricePerNight" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="CleaningFee" class="form-label"></label>
+            <input asp-for="CleaningFee" type="number" min="0" step="0.01" class="form-control" />
+            <span asp-validation-for="CleaningFee" class="text-danger"></span>
+            <div class="form-text">A one-off fee charged per booking. Staybnb adds its own service fee on top.</div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-6 col-md-3 mb-3 mb-md-0">
+            <label asp-for="MaxGuests" class="form-label"></label>
+            <input asp-for="MaxGuests" type="number" min="1" class="form-control" />
+            <span asp-validation-for="MaxGuests" class="text-danger"></span>
+        </div>
+        <div class="col-6 col-md-3 mb-3 mb-md-0">
+            <label asp-for="Bedrooms" class="form-label"></label>
+            <input asp-for="Bedrooms" type="number" min="0" class="form-control" />
+            <span asp-validation-for="Bedrooms" class="text-danger"></span>
+        </div>
+        <div class="col-6 col-md-3">
+            <label asp-for="Beds" class="form-label"></label>
+            <input asp-for="Beds" type="number" min="1" class="form-control" />
+            <span asp-validation-for="Beds" class="text-danger"></span>
+        </div>
+        <div class="col-6 col-md-3">
+            <label asp-for="Bathrooms" class="form-label"></label>
+            <input asp-for="Bathrooms" type="number" min="1" class="form-control" />
+            <span asp-validation-for="Bathrooms" class="text-danger"></span>
+        </div>
+    </div>
+</section>
+
+<!-- 4. Amenities -->
+<section class="form-section">
+    <h2 class="form-section-title"><span class="section-number">4</span> What does it offer?</h2>
+
+    <div class="row g-2">
+        @foreach (var amenity in Model.AvailableAmenities)
+        {
+            <div class="col-6 col-md-4">
+                <label class="amenity-option">
+                    <input type="checkbox" name="SelectedAmenityIds" value="@amenity.Id"
+                           checked="@Model.SelectedAmenityIds.Contains(amenity.Id)" />
+                    <i class="@amenity.IconClass"></i> @amenity.Name
+                </label>
+            </div>
+        }
+    </div>
+</section>

@@ -1,0 +1,90 @@
+﻿@model Staybnb.Models.Booking
+
+@{
+    ViewData["Title"] = "Booking Details";
+}
+
+<div class="container py-4">
+    <h2 class="fw-bold mb-3">Booking Details</h2>
+
+    @if (TempData["Success"] is string success)
+    {
+        <div class="alert alert-success">@success</div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <h4>@Model.Property.Title</h4>
+
+            <p>
+                <strong>Booking Number:</strong>
+                #@Model.Id
+            </p>
+
+            <p>
+                <strong>Check-in:</strong>
+                @Model.CheckInDate.ToString("dd MMM yyyy")
+            </p>
+
+            <p>
+                <strong>Check-out:</strong>
+                @Model.CheckOutDate.ToString("dd MMM yyyy")
+            </p>
+
+            <p>
+                <strong>Guests:</strong>
+                @Model.NumberOfGuests
+            </p>
+
+            <p>
+                <strong>Status:</strong>
+                @Model.Status
+            </p>
+
+            <hr />
+
+            <p>
+                Nightly rate:
+                @Money.Rand(Model.PricePerNight)
+            </p>
+
+            <p>
+                Nights:
+                @Model.Nights
+            </p>
+
+            <p>
+                Cleaning fee:
+                @Money.Rand(Model.CleaningFee)
+            </p>
+
+            <p>
+                Service fee:
+                @Money.Rand(Model.ServiceFee)
+            </p>
+
+            <h4 class="text-danger">
+                Total: @Money.Rand(Model.TotalPrice)
+            </h4>
+
+            <a asp-area=""
+               asp-controller="Bookings"
+               asp-action="Index"
+               class="btn btn-outline-danger mt-3">
+                View My Bookings
+            </a>
+
+
+            @if (Model.Status == Staybnb.Enums.BookingStatus.Approved ||
+                 Model.Status == Staybnb.Enums.BookingStatus.CheckedIn)
+            {
+                <a asp-controller="GuestCheckIn"
+                   asp-action="Index"
+                   asp-route-bookingId="@Model.Id"
+                   class="btn btn-success mt-3">
+                    Complete Check-in
+                </a>
+            }
+        </div>
+    </div>
+</div>

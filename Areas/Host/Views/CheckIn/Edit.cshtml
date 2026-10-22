@@ -1,0 +1,107 @@
+﻿@model Staybnb.ViewModels.HostCheckInViewModel
+
+@{
+    ViewData["Title"] = "Configure Check-in";
+}
+
+<div class="panel p-4 mb-4">
+    <h2 class="h4 text-danger fw-bold">
+        Configure Check-in
+    </h2>
+
+    <p class="text-muted mb-0">
+        Property: <strong>@Model.PropertyTitle</strong>
+    </p>
+</div>
+
+<div class="panel p-4">
+    <form asp-area="Host"
+          asp-controller="CheckIn"
+          asp-action="Edit"
+          asp-route-id="@Model.PropertyId"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden"
+               asp-for="PropertyId" />
+
+        <div asp-validation-summary="All"
+             class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label asp-for="Title"
+                   class="form-label fw-semibold">
+                Check-in Title
+            </label>
+
+            <input asp-for="Title"
+                   class="form-control" />
+
+            <span asp-validation-for="Title"
+                  class="text-danger"></span>
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="Instructions"
+                   class="form-label fw-semibold">
+                Check-in Instructions
+            </label>
+
+            <textarea asp-for="Instructions"
+                      class="form-control"
+                      rows="7"
+                      placeholder="Enter each check-in step on a new line"></textarea>
+
+            <div class="form-text">
+                Enter one instruction per line.
+            </div>
+
+            <span asp-validation-for="Instructions"
+                  class="text-danger"></span>
+        </div>
+
+        <h5 class="fw-bold mb-3">
+            Required Documents
+        </h5>
+
+        <div class="form-check mb-2">
+            <input asp-for="RequireId"
+                   class="form-check-input" />
+
+            <label asp-for="RequireId"
+                   class="form-check-label">
+                Government-issued ID
+            </label>
+        </div>
+
+        <div class="form-check mb-4">
+            <input asp-for="RequirePassport"
+                   class="form-check-input" />
+
+            <label asp-for="RequirePassport"
+                   class="form-check-label">
+                Passport
+            </label>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit"
+                    class="btn btn-danger">
+                <i class="fa-solid fa-floppy-disk me-1"></i>
+                Save Requirements
+            </button>
+
+            <a asp-area="Host"
+               asp-controller="CheckIn"
+               asp-action="Index"
+               class="btn btn-outline-secondary">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

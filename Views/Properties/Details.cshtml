@@ -1,0 +1,205 @@
+﻿@model Staybnb.Models.HostProperty
+
+@{
+    ViewData["Title"] = Model.Title;
+
+    // Working image URLs from Unsplash.
+    // These are sample photographs for demonstration.
+    var onlineHouseImages = new[]
+    {
+        "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9",
+        "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d",
+        "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3",
+        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+        "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde"
+    };
+
+    // Use a different starting photo for each property.
+    var fallbackIndex = (int)(
+        (long)Model.Id % onlineHouseImages.Length
+    );
+
+    var fallbackImage = onlineHouseImages[fallbackIndex];
+
+    // Retrieve the property's saved image URLs.
+    var propertyImages = Model.Images?
+        .OrderBy(i => i.Id)
+        .Where(i => !string.IsNullOrWhiteSpace(i.ImageUrl))
+        .Select(i => i.ImageUrl)
+        .ToList() ?? new List<string>();
+
+    // If the property has no saved pictures,
+    // display three sample house photographs.
+    if (propertyImages.Count == 0)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            int imageIndex =
+                (fallbackIndex + i) % onlineHouseImages.Length;
+
+            propertyImages.Add(onlineHouseImages[imageIndex]);
+        }
+    }
+}
+
+<div class="container py-4">
+
+    <!-- BACK BUTTON -->
+    <a asp-controller="Home"
+       asp-action="Index"
+       class="text-decoration-none">
+        ← Back to properties
+    </a>
+
+    <!-- PROPERTY TITLE -->
+    <h2 class="fw-bold mt-3">
+        @Model.Title
+    </h2>
+
+    <p class="text-muted">
+        @Model.City, @Model.Country
+    </p>
+
+    <!-- HOUSE PHOTOGRAPHS -->
+    <div class="row g-3 mb-4">
+
+        @foreach (var imageUrl in propertyImages)
+        {
+            <div class="col-md-4">
+
+                <div class="card border-0 shadow-sm h-100">
+
+                    <img src="@imageUrl"
+                         alt="House photograph for @Model.Title"
+                         class="card-img-top rounded"
+                         loading="lazy"
+                         onerror="this.onerror=null;this.src='@fallbackImage';"
+                         style="width:100%;
+                    height:250px;
+                    object-fit:cover;" />
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+    <!-- PROPERTY DETAILS -->
+    <div class="row">
+
+        <div class="col-md-8">
+
+            <h4 class="fw-bold">
+                About this property
+            </h4>
+
+            <p>
+                @Model.Description
+            </p>
+
+            <hr />
+
+            <h5 class="fw-bold">
+                Property Details
+            </h5>
+
+            <p>
+                <strong>Property Type:</strong>
+                @Model.PropertyType
+            </p>
+
+            <p>
+                <strong>Maximum Guests:</strong>
+                @Model.MaxGuests
+            </p>
+
+            <p>
+                <strong>Bedrooms:</strong>
+                @Model.Bedrooms
+            </p>
+
+            <p>
+                <strong>Beds:</strong>
+                @Model.Beds
+            </p>
+
+            <p>
+                <strong>Bathrooms:</strong>
+                @Model.Bathrooms
+            </p>
+
+            <hr />
+
+            <!-- AMENITIES -->
+            <h5 class="fw-bold mt-4">
+                Amenities
+            </h5>
+
+            @if (Model.Amenities?.Any() == true)
+            {
+                <ul class="list-group list-group-flush">
+
+                    @foreach (var amenity in Model.Amenities)
+                    {
+                        <li class="list-group-item">
+                            @amenity.Name
+                        </li>
+                    }
+
+                </ul>
+            }
+            else
+            {
+                <p class="text-muted">
+                    No amenities listed.
+                </p>
+            }
+
+        </div>
+
+        <!-- BOOKING CARD -->
+        <div class="col-md-4">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body">
+
+                    <h4 class="text-danger fw-bold">
+
+                        @Money.Rand(Model.PricePerNight)
+
+                        <small class="text-muted fs-6">
+                            / night
+                        </small>
+
+                    </h4>
+
+                    <p class="text-muted mt-3">
+                        Cleaning fee:
+                        @Money.Rand(Model.CleaningFee)
+                    </p>
+
+                    <hr />
+
+                    <p class="small text-muted">
+                        Select Book Now to continue
+                        with your reservation.
+                    </p>
+
+                    <a asp-controller="Bookings"
+                       asp-action="Create"
+                       asp-route-propertyId="@Model.Id"
+                       class="btn btn-danger w-100">
+                        Book Now
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

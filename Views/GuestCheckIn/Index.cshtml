@@ -1,0 +1,343 @@
+﻿@using Staybnb.Enums
+@model Staybnb.ViewModels.GuestCheckInViewModel
+
+@{
+    ViewData["Title"] = "Guest Check-in";
+
+    var canUpload =
+        Model.Status == CheckInStatus.Pending ||
+        Model.Status == CheckInStatus.InProgress ||
+        Model.Status == CheckInStatus.Rejected;
+
+    // Only allow missing or rejected document types.
+    var availableDocumentTypes = Model.RequiredDocuments
+        .Where(type => !Model.Documents.Any(d =>
+            d.DocumentType.Equals(
+                type,
+                StringComparison.OrdinalIgnoreCase) &&
+            d.Status != DocumentStatus.Rejected))
+        .ToList();
+
+    // Every required document must be uploaded
+    // and must not be rejected.
+    var hasAllRequiredDocuments = Model.RequiredDocuments.All(type =>
+        Model.Documents.Any(d =>
+            d.DocumentType.Equals(
+                type,
+                StringComparison.OrdinalIgnoreCase) &&
+            d.Status != DocumentStatus.Rejected));
+
+    var canSubmit =
+        canUpload &&
+        hasAllRequiredDocuments &&
+        Model.RequiredDocuments.Any();
+}
+
+<div class="container py-4">
+
+    <h2 class="fw-bold mb-2">Guest Check-in</h2>
+
+    <p class="text-muted">
+        Property: <strong>@Model.PropertyTitle</strong>
+    </p>
+
+    @if (TempData["Success"] is string success)
+    {
+        <div class="alert alert-success">
+            @success
+        </div>
+    }
+
+    @if (TempData["Error"] is string error)
+    {
+        <div class="alert alert-danger">
+            @error
+        </div>
+    }
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <h4>@Model.CheckInTitle</h4>
+
+            <h6 class="mt-4">Check-in Instructions</h6>
+
+            <ol>
+                @foreach (var step in Model.Steps)
+                {
+                    <li class="mb-2">@step</li>
+                }
+            </ol>
+
+            <p>
+                <strong>Status:</strong>
+
+                @if (Model.Status == CheckInStatus.Verified)
+                {
+                    <span class="badge bg-success">
+                        Verified
+                    </span>
+                }
+                else if (Model.Status == CheckInStatus.Rejected)
+                {
+                    <span class="badge bg-danger">
+                        Rejected - Action Required
+                    </span>
+                }
+                else if (Model.Status == CheckInStatus.Submitted)
+                {
+                    <span class="badge bg-info text-dark">
+                        Awaiting Host Verification
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">
+                        @Model.Status
+                    </span>
+                }
+            </p>
+
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <h5>Required Documents</h5>
+
+            <ul>
+                @foreach (var type in Model.RequiredDocuments)
+                {
+                    var uploaded = Model.Documents.FirstOrDefault(d =>
+                        d.DocumentType.Equals(
+                            type,
+                            StringComparison.OrdinalIgnoreCase));
+
+                    <li class="mb-2">
+                        <strong>@type</strong>
+
+                        @if (uploaded is null)
+                        {
+                            <span class="badge bg-warning text-dark">
+                                Not Uploaded
+                            </span>
+                        }
+                        else if (uploaded.Status == DocumentStatus.Verified)
+                        {
+                            <span class="badge bg-success">
+                                Verified
+                            </span>
+                        }
+                        else if (uploaded.Status == DocumentStatus.Rejected)
+                        {
+                            <span class="badge bg-danger">
+                                Rejected
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-info text-dark">
+                                Pending Review
+                            </span>
+                        }
+                    </li>
+                }
+            </ul>
+
+            @if (Model.Documents.Any())
+            {
+                <h6 class="mt-4">Uploaded Documents</h6>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+
+                        <thead>
+                            <tr>
+                                <th>Document Type</th>
+                                <th>Status</th>
+                                <th>Host Remarks</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var document in Model.Documents)
+                            {
+                                <tr>
+                                    <td>@document.DocumentType</td>
+
+                                    <td>
+                                        @if (document.Status == DocumentStatus.Verified)
+                                        {
+                                            <span class="badge bg-success">
+                                                Verified
+                                            </span>
+                                        }
+                                        else if (document.Status == DocumentStatus.Rejected)
+                                        {
+                                            <span class="badge bg-danger">
+                                                Rejected
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                Pending
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @if (!string.IsNullOrWhiteSpace(document.HostRemarks))
+                                        {
+                                            <span class="text-danger">
+                                                @document.HostRemarks
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+
+                    </table>
+                </div>
+            }
+
+        </div>
+    </div>
+
+    @if (canUpload)
+    {
+        @if (Model.Status == CheckInStatus.Rejected)
+        {
+            <div class="alert alert-warning">
+                <strong>Action Required:</strong>
+                One or more documents were rejected.
+                Please upload corrected documents and submit
+                your check-in again.
+            </div>
+        }
+
+        @if (availableDocumentTypes.Any())
+        {
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+
+                    <h5>
+                        @(Model.Status == CheckInStatus.Rejected
+                            ? "Replace Rejected Documents"
+                            : "Upload Identification Document")
+                    </h5>
+
+                    <form asp-area=""
+                          asp-controller="GuestCheckIn"
+                          asp-action="Upload"
+                          method="post"
+                          enctype="multipart/form-data">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               asp-for="BookingId" />
+
+                        <div class="mb-3">
+                            <label asp-for="DocumentType"
+                                   class="form-label">
+                                Document Type
+                            </label>
+
+                            <select asp-for="DocumentType"
+                                    class="form-select"
+                                    required>
+
+                                <option value="">
+                                    Select document
+                                </option>
+
+                                @foreach (var type in availableDocumentTypes)
+                                {
+                                    <option value="@type">
+                                        @type
+                                    </option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="DocumentFile"
+                                   class="form-label">
+                                Choose File
+                            </label>
+
+                            <input asp-for="DocumentFile"
+                                   type="file"
+                                   accept=".jpg,.jpeg,.png,.pdf"
+                                   class="form-control"
+                                   required />
+
+                            <small class="text-muted">
+                                JPG, PNG or PDF. Maximum 5 MB.
+                            </small>
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-danger">
+                            Upload Document
+                        </button>
+
+                    </form>
+                </div>
+            </div>
+        }
+
+        @if (canSubmit)
+        {
+            <form asp-area=""
+                  asp-controller="GuestCheckIn"
+                  asp-action="Submit"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       name="bookingId"
+                       value="@Model.BookingId" />
+
+                <button type="submit"
+                        class="btn btn-success">
+                    Submit Documents for Verification
+                </button>
+            </form>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                Please upload all missing or rejected
+                documents before submitting your check-in.
+            </div>
+        }
+    }
+    else if (Model.Status == CheckInStatus.Submitted)
+    {
+        <div class="alert alert-info">
+            Your documents have been submitted and are
+            awaiting Host verification.
+        </div>
+    }
+    else if (Model.Status == CheckInStatus.Verified)
+    {
+        <div class="alert alert-success">
+            Your check-in has been successfully verified
+            by the Host.
+        </div>
+    }
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

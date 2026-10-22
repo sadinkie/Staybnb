@@ -1,3 +1,5 @@
+using System.Globalization;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Staybnb.Data;
@@ -48,7 +50,14 @@ builder.Services.Configure<SecurityStampValidatorOptions>(options =>
 // ---------- Our services ----------
 builder.Services.AddScoped<IActivityLogService, ActivityLogService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
-
+builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+builder.Services.AddScoped<
+    IPrivateDocumentStorageService,
+    PrivateDocumentStorageService>();
+builder.Services.AddScoped<IPropertyApplicationService, PropertyApplicationService>();
+builder.Services.AddScoped<IHostApplicationReviewService, HostApplicationReviewService>();
+builder.Services.AddScoped<IUserPromotionService, UserPromotionService>();
+builder.Services.AddScoped<IPropertyManagementService, PropertyManagementService>();
 var app = builder.Build();
 
 // ---------- Seed roles, SuperAdmin and (optionally) demo data on startup ----------
@@ -66,6 +75,14 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+// Browsers post numbers as "1780.50". A South African server culture expects a comma, so pin the culture.
+var appCulture = new CultureInfo("en-US");
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture(appCulture),
+    SupportedCultures = new List<CultureInfo> { appCulture },
+    SupportedUICultures = new List<CultureInfo> { appCulture }
+});
 app.UseRouting();
 
 app.UseAuthentication();

@@ -1,0 +1,80 @@
+﻿@model HostRequestsViewModel
+@{
+    ViewData["Title"] = "Host Requests";
+    var current = Model.Filter?.ToString() ?? "All";
+}
+
+<div class="type-chips mb-4">
+    <a class="type-chip @(current == "Pending" ? "active" : "")" asp-action="Index" asp-route-status="Pending">
+        <i class="fa-solid fa-hourglass-half"></i> Pending <span class="badge bg-secondary ms-1">@Model.PendingCount</span>
+    </a>
+    <a class="type-chip @(current == "Approved" ? "active" : "")" asp-action="Index" asp-route-status="Approved">
+        <i class="fa-solid fa-circle-check"></i> Approved <span class="badge bg-secondary ms-1">@Model.ApprovedCount</span>
+    </a>
+    <a class="type-chip @(current == "Rejected" ? "active" : "")" asp-action="Index" asp-route-status="Rejected">
+        <i class="fa-solid fa-circle-xmark"></i> Rejected <span class="badge bg-secondary ms-1">@Model.RejectedCount</span>
+    </a>
+    <a class="type-chip @(current == "All" ? "active" : "")" asp-action="Index" asp-route-status="All">
+        <i class="fa-solid fa-border-all"></i> All <span class="badge bg-secondary ms-1">@Model.TotalCount</span>
+    </a>
+</div>
+
+@if (!Model.Applications.Any())
+{
+    <div class="text-center py-5">
+        <div class="display-6 mb-2">📭</div>
+        <h2 class="h5">Nothing here</h2>
+        <p class="text-muted">There are no @(current == "All" ? "" : current.ToLower() + " ")applications to show.</p>
+    </div>
+}
+else
+{
+    <div class="panel">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Applicant</th>
+                        <th>Price</th>
+                        <th>Applied</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var app in Model.Applications)
+                    {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <img class="list-thumb" src="@(app.ThumbnailUrl ?? PlaceholderImage.UrlFor(0))" alt="" />
+                                    <div>
+                                        <div class="fw-semibold">@app.PropertyTitle</div>
+                                        <div class="text-muted small"><i class="fa-solid fa-location-dot me-1"></i>@app.City</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="fw-semibold">@app.ApplicantName</div>
+                                <div class="text-muted small">@app.ApplicantEmail</div>
+                                @if (app.IsAdditional)
+                                {
+                                    <span class="badge bg-info-subtle text-info-emphasis">Additional property</span>
+                                }
+                            </td>
+                            <td>@Money.Rand(app.PricePerNight)</td>
+                            <td class="text-muted small">@app.AppliedAt.ToLocalTime().ToString("d MMM yyyy")</td>
+                            <td><span class="status-badge @BadgeStyle.For(app.Status)">@app.Status</span></td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-danger" asp-action="Details" asp-route-id="@app.ApplicationId">
+                                    @(app.Status == ApplicationStatus.Pending ? "Review" : "View")
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

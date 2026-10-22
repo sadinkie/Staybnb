@@ -1,0 +1,109 @@
+﻿@model Staybnb.ViewModels.CreateBookingViewModel
+
+@{
+    ViewData["Title"] = "Book a Stay";
+}
+
+<div class="container py-4">
+    <h2 class="fw-bold mb-2">Book Your Stay</h2>
+
+    <p class="text-muted">
+        Property: <strong>@Model.PropertyTitle</strong>
+    </p>
+
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <form asp-controller="Bookings"
+                          asp-action="Create"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" asp-for="PropertyId" />
+
+                        <div asp-validation-summary="All"
+                             class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="CheckInDate"
+                                   class="form-label">
+                                Check-in Date
+                            </label>
+
+                            <input asp-for="CheckInDate"
+                                   type="date"
+                                   class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="CheckOutDate"
+                                   class="form-label">
+                                Check-out Date
+                            </label>
+
+                            <input asp-for="CheckOutDate"
+                                   type="date"
+                                   class="form-control" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="NumberOfGuests"
+                                   class="form-label">
+                                Number of Guests
+                            </label>
+
+                            <input asp-for="NumberOfGuests"
+                                   type="number"
+                                   min="1"
+                                   max="@Model.MaxGuests"
+                                   class="form-control" />
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-danger w-100">
+                            Request Booking
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold">Price Summary</h5>
+
+                    <hr />
+
+                    <p>
+                        Nightly rate:
+                        <strong>@Money.Rand(Model.PricePerNight)</strong>
+                    </p>
+
+                    <p>
+                        Cleaning fee:
+                        <strong>@Money.Rand(Model.CleaningFee)</strong>
+                    </p>
+
+                    <p>
+                        Service fee:
+                        <strong>@Money.Rand(Model.ServiceFee)</strong>
+                    </p>
+
+                    <hr />
+
+                    <p class="text-muted small">
+                        The final total will be calculated using
+                        your selected dates when you submit.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

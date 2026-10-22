@@ -1,6 +1,162 @@
-﻿@{
-    ViewData["Title"] = "Admin Dashboard";
+﻿@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard Overview";
 }
 
-<h1 class="h3">Admin Dashboard</h1>
-<p class="text-muted">Placeholder. You can only see this page if you are an Admin or the SuperAdmin.</p>
+<!-- Stat cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-label">Total Users</div>
+            <div class="stat-value">@Model.TotalUsers</div>
+            <div class="stat-sub text-success">Registered accounts</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+        <a class="stat-card stat-link stat-warn" asp-controller="HostRequests" asp-action="Index">
+            <div class="stat-label">Pending Host Apps</div>
+            <div class="stat-value">@Model.PendingHostApplications</div>
+            <div class="stat-sub text-warning-emphasis">Require review</div>
+        </a>
+    </div>
+
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-label">Active Properties</div>
+            <div class="stat-value">@Model.ActiveProperties</div>
+            <div class="stat-sub text-success">Listings available</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-label">Platform Revenue</div>
+            <div class="stat-value">@Money.Rand(Model.PlatformRevenue)</div>
+            <div class="stat-sub text-success">Service fees earned</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-label">Total Bookings</div>
+            <div class="stat-value">@Model.TotalBookings</div>
+            <div class="stat-sub text-success">@Model.PendingBookings pending</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-label">Approved Hosts</div>
+            <div class="stat-value">@Model.ApprovedHosts</div>
+            <div class="stat-sub text-success">Active hosts</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+
+    <!-- Recent activity -->
+    <div class="col-lg-7">
+        <div class="panel">
+            <div class="panel-head">
+                <span>Recent Activity</span>
+                <a class="small" asp-controller="ActivityLogs" asp-action="Index">View all</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr><th>User</th><th>Action</th><th>When</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var log in Model.RecentActivity)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">@log.UserName</div>
+                                    <div class="text-muted small">@log.UserEmail</div>
+                                </td>
+                                <td><span class="status-badge @BadgeStyle.For(log.ActivityType)">@log.Action</span></td>
+                                <td class="text-muted small">@TimeFormat.Ago(log.CreatedAt)</td>
+                            </tr>
+                        }
+                        @if (!Model.RecentActivity.Any())
+                        {
+                            <tr><td colspan="3" class="text-center text-muted py-4">No activity yet.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent applications -->
+    <div class="col-lg-5">
+        <div class="panel">
+            <div class="panel-head">
+                <span>Recent Host Applications</span>
+                <a class="small" asp-controller="HostRequests" asp-action="Index" asp-route-status="All">View all</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr><th>Applicant</th><th>Status</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var app in Model.RecentApplications)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">@app.ApplicantName</div>
+                                    <div class="text-muted small">@app.PropertyTitle</div>
+                                </td>
+                                <td><span class="status-badge @BadgeStyle.For(app.Status)">@app.Status</span></td>
+                                <td class="text-end">
+                                    <a class="btn btn-sm btn-outline-secondary rounded-pill"
+                                       asp-controller="HostRequests" asp-action="Details" asp-route-id="@app.ApplicationId">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.RecentApplications.Any())
+                        {
+                            <tr><td colspan="3" class="text-center text-muted py-4">No applications yet.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent bookings -->
+    <div class="col-12">
+        <div class="panel">
+            <div class="panel-head"><span>Recent Bookings</span></div>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr><th>Guest</th><th>Dates</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var b in Model.RecentBookings)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">@b.GuestName</div>
+                                    <div class="text-muted small">@b.GuestEmail</div>
+                                </td>
+                                <td>@b.CheckIn.ToString("d MMM") to @b.CheckOut.ToString("d MMM yyyy")</td>
+                                <td><span class="status-badge @BadgeStyle.For(b.Status)">@b.Status</span></td>
+                            </tr>
+                        }
+                        @if (!Model.RecentBookings.Any())
+                        {
+                            <tr><td colspan="3" class="text-center text-muted py-4">No bookings yet. They appear here once guests start booking.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

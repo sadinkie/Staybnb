@@ -1,0 +1,128 @@
+﻿@using Staybnb.Enums
+@model List<Staybnb.Models.Booking>
+
+@{
+    ViewData["Title"] = "My Bookings";
+}
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">My Bookings</h2>
+            <p class="text-muted mb-0">
+                View your reservations and booking statuses.
+            </p>
+        </div>
+
+        <a asp-controller="Home"
+           asp-action="Index"
+           class="btn btn-outline-danger">
+            Browse Properties
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="card shadow-sm">
+            <div class="card-body text-center py-5">
+                <h5>No bookings yet</h5>
+                <p class="text-muted">
+                    Your reservations will appear here.
+                </p>
+
+                <a asp-controller="Home"
+                   asp-action="Index"
+                   class="btn btn-danger">
+                    Find a Stay
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Booking</th>
+                        <th>Property</th>
+                        <th>Dates</th>
+                        <th>Guests</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var booking in Model)
+                    {
+                        <tr>
+                            <td>#@booking.Id</td>
+
+                            <td class="fw-semibold">
+                                @booking.Property.Title
+                            </td>
+
+                            <td>
+                                @booking.CheckInDate.ToString("dd MMM yyyy")
+                                <br />
+                                <span class="text-muted small">
+                                    to @booking.CheckOutDate.ToString("dd MMM yyyy")
+                                </span>
+                            </td>
+
+                            <td>@booking.NumberOfGuests</td>
+
+                            <td class="fw-semibold">
+                                @Money.Rand(booking.TotalPrice)
+                            </td>
+
+                            <td>
+                                @if (booking.Status == BookingStatus.Approved)
+                                {
+                                    <span class="badge bg-success">Approved</span>
+                                }
+                                else if (booking.Status == BookingStatus.Pending)
+                                {
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                }
+                                else if (booking.Status == BookingStatus.Rejected)
+                                {
+                                    <span class="badge bg-danger">Rejected</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+                                        @booking.Status
+                                    </span>
+                                }
+                            </td>
+
+                            <td>
+                                <a asp-controller="Bookings"
+                                   asp-action="Details"
+                                   asp-route-id="@booking.Id"
+                                   class="btn btn-outline-danger btn-sm">
+                                    View Details
+                                </a>
+
+                                @if (booking.Status == BookingStatus.Approved ||
+                                     booking.Status == BookingStatus.CheckedIn)
+                                {
+                                    <a asp-controller="GuestCheckIn"
+                                       asp-action="Index"
+                                       asp-route-bookingId="@booking.Id"
+                                       class="btn btn-success btn-sm mt-1">
+                                        Check-in
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

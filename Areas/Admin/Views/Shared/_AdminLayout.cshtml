@@ -25,9 +25,12 @@
                 <a class="side-link @Active("Dashboard")" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
                     <i class="fa-solid fa-chart-pie"></i> Dashboard
                 </a>
-                <a class="side-link @Active("Users")" href="/Admin/Users">
-                    <i class="fa-solid fa-users"></i> Users
-                </a>
+                @if (User.IsInRole("SuperAdmin"))
+{
+    <a class="side-link @Active("Users")" href="/Admin/Users">
+        <i class="fa-solid fa-users"></i> Users
+    </a>
+}
                 <a class="side-link @Active("HostRequests")" href="/Admin/HostRequests">
                     <i class="fa-solid fa-file-signature"></i> Host Requests
                 </a>
@@ -67,6 +70,7 @@
             </header>
 
             <main class="content">
+                <partial name="_Alerts" />
                 @RenderBody()
             </main>
         </div>

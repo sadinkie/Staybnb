@@ -1,0 +1,79 @@
+﻿@model UsersViewModel
+@{
+    ViewData["Title"] = "Users";
+
+    string RoleBadge(string role) => role switch
+    {
+        "SuperAdmin" => "status-role",
+        "Admin" => "status-info",
+        "Host" => "status-approved",
+        _ => "status-neutral"
+    };
+}
+
+<form method="get" asp-action="Index" class="d-flex flex-wrap gap-2 mb-4">
+    <input type="text" name="search" value="@Model.Search" class="form-control" style="max-width:300px"
+           placeholder="Search by name or email" />
+
+    <select name="role" class="form-select" style="max-width:180px">
+        @foreach (var r in new[] { "All", "Guest", "Host", "Admin", "SuperAdmin" })
+        {
+            <option value="@r" selected="@(r == Model.Role)">@(r == "All" ? "All roles" : r)</option>
+        }
+    </select>
+
+    <button type="submit" class="btn btn-danger">Search</button>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Search) || Model.Role != "All")
+    {
+        <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+    }
+</form>
+
+<div class="panel">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr><th>User</th><th>Roles</th><th>Joined</th><th class="text-end">Action</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model.Users)
+                {
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">@user.FullName</div>
+                            <div class="text-muted small">@user.Email</div>
+                        </td>
+                        <td>
+                            @foreach (var role in user.Roles)
+                            {
+                                <span class="status-badge @RoleBadge(role) me-1">@role</span>
+                            }
+                        </td>
+                        <td class="text-muted small">@user.CreatedAt.ToLocalTime().ToString("d MMM yyyy")</td>
+                        <td class="text-end">
+                            @if (user.IsGuest)
+                            {
+                                <form asp-action="PromoteToAdmin" asp-route-id="@user.Id"
+                                      asp-route-search="@Model.Search" asp-route-role="@Model.Role" method="post"
+                                      onsubmit="return confirm('Promote @user.FullName to Admin? They will no longer be a Guest.');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fa-solid fa-user-shield me-1"></i>Promote to Admin
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="text-muted small">Only Guests can be promoted</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Users.Any())
+                {
+                    <tr><td colspan="4" class="text-center text-muted py-4">No users match your search.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

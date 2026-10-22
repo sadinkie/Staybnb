@@ -1,0 +1,72 @@
+﻿@model ActivityLogsViewModel
+@{
+    ViewData["Title"] = "Activity Logs";
+}
+
+<form method="get" asp-action="Index" class="d-flex flex-wrap gap-2 mb-4">
+    <select name="type" class="form-select" style="max-width:220px">
+        <option value="">All activity types</option>
+        @foreach (var t in Enum.GetValues<ActivityType>())
+        {
+            <option value="@t" selected="@(Model.Type == t)">@t</option>
+        }
+    </select>
+
+    <input type="text" name="q" value="@Model.Search" class="form-control" style="max-width:300px"
+           placeholder="Search action, user or details" />
+
+    <button type="submit" class="btn btn-danger">Filter</button>
+
+    @if (Model.Type.HasValue || !string.IsNullOrWhiteSpace(Model.Search))
+    {
+        <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+    }
+</form>
+
+<p class="text-muted small">@Model.TotalCount @(Model.TotalCount == 1 ? "entry" : "entries")</p>
+
+<div class="panel">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr><th>When</th><th>User</th><th>Action</th><th>Details</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var log in Model.Items)
+                {
+                    <tr>
+                        <td class="text-muted small text-nowrap">@log.CreatedAt.ToLocalTime().ToString("d MMM yyyy, HH:mm")</td>
+                        <td>
+                            <div class="fw-semibold">@log.UserName</div>
+                            <div class="text-muted small">@log.UserEmail</div>
+                        </td>
+                        <td>
+                            <span class="status-badge @BadgeStyle.For(log.ActivityType)">@log.Action</span>
+                            <div class="text-muted small mt-1">@log.ActivityType</div>
+                        </td>
+                        <td class="small">@log.Details</td>
+                    </tr>
+                }
+                @if (!Model.Items.Any())
+                {
+                    <tr><td colspan="4" class="text-center text-muted py-4">No log entries match your filters.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@if (Model.TotalPages > 1)
+{
+    <nav class="d-flex justify-content-between align-items-center mt-3">
+        <a class="btn btn-outline-secondary btn-sm @(Model.Page <= 1 ? "disabled" : "")"
+           asp-action="Index" asp-route-page="@(Model.Page - 1)" asp-route-type="@Model.Type" asp-route-q="@Model.Search">
+            <i class="fa-solid fa-chevron-left me-1"></i>Previous
+        </a>
+        <span class="text-muted small">Page @Model.Page of @Model.TotalPages</span>
+        <a class="btn btn-outline-secondary btn-sm @(Model.Page >= Model.TotalPages ? "disabled" : "")"
+           asp-action="Index" asp-route-page="@(Model.Page + 1)" asp-route-type="@Model.Type" asp-route-q="@Model.Search">
+            Next<i class="fa-solid fa-chevron-right ms-1"></i>
+        </a>
+    </nav>
+}
