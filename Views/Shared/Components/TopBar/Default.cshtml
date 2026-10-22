@@ -1,0 +1,82 @@
+﻿@using Staybnb.Enums
+@model TopBarViewModel
+@{
+    string Icon(NotificationType type) => type switch
+    {
+        NotificationType.HostApplication => "fa-file-signature",
+        NotificationType.AdditionalPropertyApplication => "fa-square-plus",
+        NotificationType.Booking => "fa-calendar-check",
+        NotificationType.CheckIn => "fa-id-card",
+        NotificationType.Message => "fa-envelope",
+        NotificationType.Property => "fa-house",
+        _ => "fa-bell"
+    };
+}
+
+<div class="d-flex align-items-center gap-2">
+
+    <a class="icon-btn" href="/Messages" title="Messages">
+        <i class="fa-solid fa-envelope"></i>
+        @if (Model.UnreadMessages > 0)
+        {
+            <span class="badge-dot">@Model.UnreadMessages</span>
+        }
+    </a>
+
+    <div class="dropdown">
+        <button class="icon-btn" type="button" data-bs-toggle="dropdown"
+                data-bs-auto-close="outside" aria-expanded="false" title="Notifications">
+            <i class="fa-solid fa-bell"></i>
+            @if (Model.UnreadNotifications > 0)
+            {
+                <span class="badge-dot">@Model.UnreadNotifications</span>
+            }
+        </button>
+
+        <div class="dropdown-menu dropdown-menu-end notif-menu p-0">
+            <div class="notif-head">Notifications</div>
+
+            @if (!Model.Recent.Any())
+            {
+                <div class="notif-empty">You're all caught up.</div>
+            }
+            else
+            {
+                foreach (var n in Model.Recent)
+                {
+                    <a class="notif-item @(n.IsRead ? "" : "unread")" href="@(n.ActionUrl ?? "/Notifications")">
+                        <span class="notif-icon"><i class="fa-solid @Icon(n.Type)"></i></span>
+                        <span class="notif-body">
+                            <span class="notif-title">@n.Title</span>
+                            <span class="notif-text">@n.Message</span>
+                            <span class="notif-time">@Staybnb.Services.TimeFormat.Ago(n.CreatedAt)</span>
+                        </span>
+                    </a>
+                }
+            }
+
+            <a class="notif-foot" href="/Notifications">View all notifications</a>
+        </div>
+    </div>
+
+    <div class="dropdown">
+        <button class="user-chip" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="avatar">@Model.Initials</span>
+            <span class="d-none d-md-block text-start lh-sm">
+                <span class="user-name">@Model.FullName</span>
+                <span class="user-role">@Model.RoleLabel</span>
+            </span>
+            <i class="fa-solid fa-chevron-down small text-muted"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                    <button type="submit" class="dropdown-item">
+                        <i class="fa-solid fa-right-from-bracket me-2"></i>Logout
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </div>
+
+</div>

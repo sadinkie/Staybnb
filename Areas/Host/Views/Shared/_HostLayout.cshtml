@@ -1,0 +1,77 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Staybnb Host</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    @{
+        var current = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+        string Active(string controller) =>
+            string.Equals(current, controller, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+    }
+
+    <div class="app-shell">
+        <aside class="sidebar">
+            <a class="brand sidebar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                <i class="fa-solid fa-house-chimney"></i> staybnb <small>host</small>
+            </a>
+
+            <nav>
+                <a class="side-link @Active("Dashboard")" asp-area="Host" asp-controller="Dashboard" asp-action="Index">
+                    <i class="fa-solid fa-chart-pie"></i> Dashboard
+                </a>
+                <a class="side-link @Active("Properties")" href="/Host/Properties">
+                    <i class="fa-solid fa-house"></i> My Properties
+                </a>
+                <a class="side-link @Active("Bookings")" href="/Host/Bookings">
+                    <i class="fa-solid fa-calendar-check"></i> Booking Requests
+                </a>
+                <a class="side-link @Active("Earnings")" href="/Host/Earnings">
+                    <i class="fa-solid fa-money-bill-wave"></i> Earnings
+                </a>
+                <a class="side-link @Active("Reviews")" href="/Host/Reviews">
+                    <i class="fa-solid fa-star"></i> Reviews
+                </a>
+                <a class="side-link @Active("Messages")" href="/Messages">
+                    <i class="fa-solid fa-envelope"></i> Messages
+                </a>
+                <a class="side-link @Active("Notifications")" href="/Notifications">
+                    <i class="fa-solid fa-bell"></i> Notifications
+                </a>
+            </nav>
+
+            <form class="mt-auto" asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                <button type="submit" class="side-link logout">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </form>
+        </aside>
+
+        <div class="main-area">
+            <header class="topbar">
+                <div class="d-flex align-items-center gap-3">
+                    <button type="button" id="sidebarToggle" class="icon-btn d-lg-none" aria-label="Menu">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <h1 class="topbar-title">@ViewData["Title"]</h1>
+                </div>
+                <div>@await Component.InvokeAsync("TopBar")</div>
+            </header>
+
+            <main class="content">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

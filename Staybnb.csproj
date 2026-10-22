@@ -13,20 +13,14 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Areas\Admin\Controllers\" />
     <Folder Include="Areas\Admin\Data\" />
     <Folder Include="Areas\Admin\Models\" />
-    <Folder Include="Areas\Admin\Views\" />
-    <Folder Include="Areas\Host\Controllers\" />
     <Folder Include="Areas\Host\Data\" />
     <Folder Include="Areas\Host\Models\" />
-    <Folder Include="Areas\Host\Views\" />
-    <Folder Include="Data\" />
-    <Folder Include="ViewModels\" />
-    <Folder Include="Services\" />
     <Folder Include="wwwroot\uploads\documents\" />
     <Folder Include="wwwroot\uploads\properties\" />
   </ItemGroup>

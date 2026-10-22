@@ -1,0 +1,85 @@
+﻿@model PropertyGalleryViewModel
+@{
+    ViewData["Title"] = "Find your next stay";
+}
+
+<div class="mb-4">
+    <h1 class="page-title h2 mb-1">Relax. Unwind. Choose your next stay.</h1>
+    <p class="text-muted mb-0">Browse stays hosted across South Africa.</p>
+</div>
+
+<!-- City filter -->
+<form method="get" asp-action="Index" class="mb-3">
+    @if (Model.Type.HasValue)
+    {
+        <input type="hidden" name="type" value="@Model.Type" />
+    }
+
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+        <select name="city" class="form-select city-select" onchange="this.form.submit()" aria-label="Filter by city">
+            <option value="">All cities</option>
+            @foreach (var c in Model.Cities)
+            {
+                <option value="@c" selected="@(c == Model.City)">@c</option>
+            }
+        </select>
+
+        <noscript><button type="submit" class="btn btn-danger">Filter</button></noscript>
+
+        @if (Model.HasFilters)
+        {
+            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill">
+                <i class="fa-solid fa-xmark me-1"></i>Clear filters
+            </a>
+        }
+    </div>
+</form>
+
+<!-- Property type chips -->
+<div class="type-chips mb-4">
+    <a class="type-chip @(Model.Type is null ? "active" : "")"
+       asp-action="Index" asp-route-city="@Model.City">
+        <i class="fa-solid fa-border-all"></i> All
+    </a>
+
+    @foreach (var t in Model.AvailableTypes)
+    {
+        <a class="type-chip @(Model.Type == t ? "active" : "")"
+           asp-action="Index" asp-route-city="@Model.City" asp-route-type="@t">
+            <i class="fa-solid @t.Icon()"></i> @t
+        </a>
+    }
+</div>
+
+@if (!Model.Properties.Any())
+{
+    <div class="text-center py-5">
+        <div class="display-6 mb-2">🏡</div>
+        @if (Model.HasFilters)
+        {
+            <h2 class="h5">No stays match those filters</h2>
+            <p class="text-muted">Try a different city or property type.</p>
+            <a asp-action="Index" class="btn btn-danger">Clear filters</a>
+        }
+        else
+        {
+            <h2 class="h5">No stays are listed yet</h2>
+            <p class="text-muted">Check back soon, or become a Host and list the first one.</p>
+        }
+    </div>
+}
+else
+{
+    <p class="text-muted small mb-3">
+        @Model.Properties.Count @(Model.Properties.Count == 1 ? "stay" : "stays")
+    </p>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+        @foreach (var property in Model.Properties)
+        {
+            <div class="col">
+                <partial name="_PropertyCard" model="property" />
+            </div>
+        }
+    </div>
+}

@@ -1,3 +1,14 @@
 ﻿@{
-    Layout = "_Layout";
+    if (User.IsInRole("Host"))
+    {
+        Layout = "~/Areas/Host/Views/Shared/_HostLayout.cshtml";
+    }
+    else if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
+    {
+        Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    }
+    else
+    {
+        Layout = "_Layout";
+    }
 }
